@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  plugin-required:
+    name: Plugin required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck hooks
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: "./hooks"
+          severity: warning
+
+      - name: JSON validity — manifests and hooks
+        run: |
+          set -eu
+          for f in \
+            .claude-plugin/plugin.json \
+            .claude-plugin/marketplace.json \
+            .cursor-plugin/plugin.json \
+            hooks/claude-code.json \
+            hooks/cursor.json \
+            docs/terminology.json; do
+            echo "checking $f"
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+          done
+
+      # `ai-flow skills lint .` joins this job in phase 10, once
+      # internal/skills/lint exists and skills/ has real content.

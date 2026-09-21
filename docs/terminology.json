@@ -1,0 +1,64 @@
+{
+  "terms": [
+    {
+      "term": "ticket",
+      "definition": "The unit of work identified by KEY (e.g. PROJ-123), tracked in status.json's handoff directory.",
+      "avoid": ["issue", "task", "story"]
+    },
+    {
+      "term": "stage",
+      "definition": "One step of the pipeline's state machine (fetch, locate, plan, implement, …), transitioned through `ai-flow stage …`.",
+      "avoid": ["phase", "step"]
+    },
+    {
+      "term": "skill",
+      "definition": "An Agent Skills document the host loads by name; carries judgement, never machine-readable state.",
+      "avoid": ["prompt", "workflow", "command"]
+    },
+    {
+      "term": "host",
+      "definition": "The agent runtime a skill executes under — Claude Code or Cursor.",
+      "avoid": ["IDE", "editor"]
+    },
+    {
+      "term": "status.json",
+      "definition": "The handoff file holding the stage state machine, referenced by its exact filename.",
+      "avoid": ["state file", "status file"]
+    },
+    {
+      "term": "handoff directory",
+      "definition": "~/.ai-flow/<KEY>/, the ticket's own directory under the ai-flow home.",
+      "avoid": ["workspace", "working directory"]
+    },
+    {
+      "term": "pack",
+      "definition": "A versioned, pinned bundle of standards guidance and checks, layered org/team/repo.",
+      "avoid": ["package", "bundle"]
+    },
+    {
+      "term": "waiver",
+      "definition": "A developer-confirmed, expiring exception to one check, recorded in <repo>/.ai-flow/waivers.json.",
+      "avoid": ["exception"]
+    },
+    {
+      "term": "target",
+      "definition": "One OPS unit under change (a Terraform module, a Kustomize overlay, …), named in ops-targets.json.",
+      "avoid": ["resource"]
+    },
+    {
+      "term": "changeset",
+      "definition": "The normalized, addon-independent representation of what a target's render would do — the output of an addon's DryRun capability.",
+      "avoid": ["diff", "plan"]
+    },
+    {
+      "term": "addon",
+      "definition": "The tool-specific package implementing the Addon interface for one infrastructure or CI tool (terraform, kubectl, helm, kustomize, github-actions, jenkins).",
+      "avoid": ["provider", "plugin"]
+    },
+    {
+      "term": "gate",
+      "definition": "A recorded human approval in status.json (plan, impact, ship) that authorizes the pipeline to proceed.",
+      "avoid": ["checkpoint", "approval step"]
+    }
+  ]
+}

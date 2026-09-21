@@ -1,0 +1,13 @@
+{
+  "name": "ai-flow-marketplace",
+  "owner": {
+    "name": "pmi-ai-stack"
+  },
+  "plugins": [
+    {
+      "name": "ai-flow",
+      "source": "./",
+      "description": "Deterministic ticket-to-PR pipeline for app and OPS tickets."
+    }
+  ]
+}

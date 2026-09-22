@@ -11,7 +11,7 @@ This repo is the **plugin** (skills, hooks) for Claude Code and Cursor. The CLI 
 ai-flow skills lint .
 ```
 
-(Once `internal/skills/lint` in the CLI repo and real skill content here both exist — `skills/` is currently empty.)
+(Live as of phase 10 — `internal/skills/lint` exists in the CLI repo and `skills/hello/` gives it real, non-empty content to check.)
 
 ## What this repo owns
 
@@ -21,4 +21,8 @@ The two hook scripts (`hooks/guard.sh`, `hooks/session-start.sh`) are the only p
 
 ## Repository status
 
-Built so far: both plugin manifests (`.claude-plugin/`, `.cursor-plugin/`), the hook registration files and scripts (with their final event bindings — the `ai-flow hook …` commands they call don't exist in the CLI yet), `docs/terminology.json`, `docs/skill-authoring.md`. `skills/` is empty — no skills have been written yet. `cli_version` stays `"dev"` until the first tagged release.
+Built so far: both plugin manifests (`.claude-plugin/`, `.cursor-plugin/`), the hook registration files and scripts (with their final event bindings, live since phase 9), `docs/terminology.json`, `docs/skill-authoring.md`.
+
+Phase 10 adds `skills/hello/` — the first non-empty entry under `skills/`, proving the `skills lint`/`skills install` loop against real content rather than only the CLI repo's own `testdata/`. It is deliberately **not** one of the fourteen stage/entry skills or six addon skills the spec names (those are phases 15, 16 and 21-27); it is a placeholder that carries no real judgement, and its own `SKILL.md` says so in its first sentence. Its description's second sentence still has to take one of skill-authoring.md's two fixed forms (there is no third, "this is a placeholder" form in the standard), so it references the real `mutation` stage id — honest about the *form* the rule checks, not about *occupancy* (no real work happens here; `run-mutation`, phase 16's real content, is that stage's actual future skill). Whoever writes phase 15/16's real skills should remove or repurpose `hello` rather than treat its stage reference as a precedent — see `.ai/phase-10/implementation-log.md` step 7 for the full reasoning.
+
+`skills/` is otherwise still empty; the Plugin required CI job now runs `ai-flow skills lint .` for real, building the CLI from a sibling `ai-flow-cli` checkout since `cli_version` is still `"dev"`. `cli_version` stays `"dev"` until the first tagged release (phase 17).

@@ -32,5 +32,29 @@ jobs:
             python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
           done
 
-      # `ai-flow skills lint .` joins this job in phase 10, once
-      # internal/skills/lint exists and skills/ has real content.
+      # ai-flow skills lint .: cli_version is still "dev" (no v0.1.0 tag
+      # yet), so the spec's own words apply — "builds it from the
+      # sibling ai-flow-cli checkout while that is 'dev'." Once phase 17
+      # moves cli_version to a real pinned range, this step's job is to
+      # install that release via install.sh instead; until then there is
+      # nothing to pin against, so building from source is the only
+      # correct choice, not a shortcut.
+      - name: Checkout sibling ai-flow-cli
+        uses: actions/checkout@v4
+        with:
+          repository: pmi-ai-stack/ai-flow-cli
+          path: ai-flow-cli-checkout
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ai-flow-cli-checkout/go.mod
+
+      - name: Build ai-flow from the sibling checkout
+        run: |
+          set -eu
+          go build -o "$RUNNER_TEMP/ai-flow" ./cmd/ai-flow
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+        working-directory: ai-flow-cli-checkout
+
+      - name: ai-flow skills lint .
+        run: ai-flow skills lint .

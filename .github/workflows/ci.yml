@@ -58,3 +58,54 @@ jobs:
 
       - name: ai-flow skills lint .
         run: ai-flow skills lint .
+
+  # Plugin evals runs skills evals . — a separate job from
+  # plugin-required, deliberately: a missing ANTHROPIC_API_KEY
+  # repository secret (every fork PR, by construction — a fork never
+  # has access to a base repository's secrets) must never block the
+  # required job. skills evals itself already turns that absence into
+  # ok:true / result.skipped:true (never a failing envelope, per the
+  # Evals section's own words), so the `if:` below is belt-and-braces:
+  # it skips the whole job on a fork PR rather than spend CI minutes on
+  # a run the CLI would immediately report as skipped anyway. Per the
+  # CI gates table, this phase wires only the PR (non-fork), single-cell
+  # (Claude Code, Sonnet 5) job; the nightly and weekly matrices are
+  # phase 30's ("defined but activated in phase 30").
+  plugin-evals:
+    name: Plugin evals
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same cli_version: "dev" reasoning as plugin-required's own
+      # "Checkout sibling ai-flow-cli" step — see that step's comment.
+      - name: Checkout sibling ai-flow-cli
+        uses: actions/checkout@v4
+        with:
+          repository: pmi-ai-stack/ai-flow-cli
+          path: ai-flow-cli-checkout
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ai-flow-cli-checkout/go.mod
+
+      - name: Build ai-flow from the sibling checkout
+        run: |
+          set -eu
+          go build -o "$RUNNER_TEMP/ai-flow" ./cmd/ai-flow
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+        working-directory: ai-flow-cli-checkout
+
+      - name: ai-flow skills evals .
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ai-flow skills evals . --out "$RUNNER_TEMP/evals"
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: ${{ runner.temp }}/evals/results.json
+          if-no-files-found: ignore

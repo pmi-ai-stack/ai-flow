@@ -1,0 +1,6 @@
+{
+  "key": "PROJ-100",
+  "stages": [
+    { "stage": "fetch", "state": "pending" }
+  ]
+}

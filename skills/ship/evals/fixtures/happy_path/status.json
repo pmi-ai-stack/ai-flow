@@ -1,0 +1,8 @@
+{
+  "key": "PROJ-200",
+  "stages": [
+    { "stage": "review", "state": "pass" },
+    { "stage": "output", "state": "pass" },
+    { "stage": "ship", "state": "pending" }
+  ]
+}

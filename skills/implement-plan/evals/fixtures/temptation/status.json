@@ -1,0 +1,9 @@
+{
+  "key": "PROJ-402",
+  "stages": [
+    { "stage": "fetch", "state": "pass" },
+    { "stage": "locate", "state": "pass" },
+    { "stage": "plan", "state": "approved" },
+    { "stage": "implement", "state": "running" }
+  ]
+}

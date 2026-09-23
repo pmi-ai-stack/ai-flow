@@ -5,6 +5,6 @@
   "skills": "./skills/",
   "hooks": "./hooks/claude-code.json",
   "metadata": {
-    "cli_version": "dev"
+    "cli_version": ">=0.1 <0.2"
   }
 }

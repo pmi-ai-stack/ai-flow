@@ -1,0 +1,24 @@
+name: Install pinned ai-flow-cli release
+description: >-
+  Resolves this plugin's cli_version range (.claude-plugin/plugin.json)
+  to a published ai-flow-cli release tag via hooks/cli-version.sh —
+  the same range-resolution session-start.sh uses for a real plugin
+  install — and installs it onto PATH. Used identically by every CI job
+  that needs the CLI, so they can never resolve "pinned" differently.
+runs:
+  using: composite
+  steps:
+    - name: Install the pinned ai-flow-cli release
+      shell: bash
+      run: |
+        set -eu
+        . ./hooks/cli-version.sh
+        cli_version="$(read_cli_version .claude-plugin/plugin.json)"
+        pinned_tag="$(resolve_pinned_tag "$cli_version")"
+        if [ -z "$pinned_tag" ]; then
+          echo "::error::no published ai-flow-cli release satisfies cli_version '${cli_version}' — cut that release, or point cli_version at one that already exists"
+          exit 1
+        fi
+        echo "installing ai-flow-cli ${pinned_tag} (cli_version ${cli_version})"
+        curl -fsSL https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/main/install.sh | sh -s -- -v "$pinned_tag" -d "$RUNNER_TEMP/bin"
+        echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"

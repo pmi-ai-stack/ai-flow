@@ -1,15 +1,12 @@
 #!/bin/sh
 # The only plugin script with logic, because it runs before the CLI is
-# known to exist: compares `ai-flow version` with the manifest's
-# cli_version ("dev" accepts any binary on PATH), installs the pinned
-# release through ai-flow-cli's install.sh when missing or out of range,
-# then execs the CLI's own session-start hook.
-#
-# `ai-flow hook session-start` is implemented once the CLI's `hook`
-# command family exists. Until then this script's last line fails, which
-# is expected: it is registered with its real, final event bindings
-# from day one, and only reaches this line once `ai-flow` is confirmed
-# present on PATH above.
+# known to exist: compares `ai-flow version`'s own reported version
+# against the manifest's cli_version range ("dev" accepts any binary on
+# PATH), installs a release satisfying that range through
+# ai-flow-cli's install.sh when missing or out of range, then execs the
+# CLI's own session-start hook. The range-comparison functions live in
+# the sibling hooks/cli-version.sh, shared with CI's own use of the same
+# comparison (see ../.github/workflows/ci.yml).
 set -eu
 
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
@@ -23,22 +20,36 @@ else
 	exit 1
 fi
 
-cli_version_wanted="$(sed -n 's/.*"cli_version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$MANIFEST" | head -n1)"
+# shellcheck source=./cli-version.sh
+. "$PLUGIN_ROOT/hooks/cli-version.sh"
+
+install_url="https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/main/install.sh"
+cli_version_wanted="$(read_cli_version "$MANIFEST")"
 
 install_needed=0
 if ! command -v ai-flow >/dev/null 2>&1; then
 	install_needed=1
 elif [ "$cli_version_wanted" != "dev" ]; then
-	# TODO(phase 17/29): once cli_version moves off "dev" to a real
-	# semver range, check `ai-flow version`'s output against it here and
-	# set install_needed=1 when it is out of range. Until then every
-	# release stays "dev" and any binary on PATH is accepted.
-	install_needed=0
+	installed_version="$(ai-flow version --json 2>/dev/null | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+	if [ -z "$installed_version" ] || ! range_satisfied "$installed_version" "$cli_version_wanted"; then
+		install_needed=1
+	fi
 fi
 
 if [ "$install_needed" -eq 1 ]; then
-	echo "session-start.sh: ai-flow not found on PATH, installing" >&2
-	curl -fsSL https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/main/install.sh | sh
+	if [ "$cli_version_wanted" = "dev" ]; then
+		echo "session-start.sh: ai-flow not found on PATH, installing latest" >&2
+		curl -fsSL "$install_url" | sh
+	else
+		pinned_tag="$(resolve_pinned_tag "$cli_version_wanted")"
+		if [ -n "$pinned_tag" ]; then
+			echo "session-start.sh: installing ai-flow ${pinned_tag} (cli_version ${cli_version_wanted})" >&2
+			curl -fsSL "$install_url" | sh -s -- -v "$pinned_tag"
+		else
+			echo "session-start.sh: could not resolve a released ai-flow-cli version matching cli_version '${cli_version_wanted}'; installing latest instead" >&2
+			curl -fsSL "$install_url" | sh
+		fi
+	fi
 fi
 
 exec ai-flow hook session-start --plugin-root "$PLUGIN_ROOT"

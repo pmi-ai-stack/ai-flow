@@ -1,0 +1,52 @@
+name: Release
+
+# Mirrors ai-flow-cli's own release.yml: the tag never rewrites this
+# repository's committed content (a tag is immutable — a later commit to
+# main would never be visible to anyone who clones or installs pinned to
+# the tag itself). Instead this stamps the tag's version into a packaged
+# copy of the plugin, the same way goreleaser bakes ai-flow-cli's own
+# tag into its build artifacts without ever committing back to that
+# repo. Maintainers bump `version` in both manifests as a normal commit
+# before tagging (see README.md's release-process note); this workflow
+# fails loudly if that was forgotten.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: package and release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify both manifests already carry this tag's version
+        run: |
+          set -eu
+          version="${GITHUB_REF_NAME#v}"
+          for manifest in .claude-plugin/plugin.json .cursor-plugin/plugin.json; do
+            manifest_version="$(jq -r '.version' "$manifest")"
+            if [ "$manifest_version" != "$version" ]; then
+              echo "::error file=${manifest}::version is '${manifest_version}', expected '${version}' from tag ${GITHUB_REF_NAME} — bump it in a commit before tagging"
+              exit 1
+            fi
+          done
+
+      - name: Package the plugin
+        run: |
+          set -eu
+          version="${GITHUB_REF_NAME#v}"
+          stage="$(mktemp -d)/ai-flow"
+          mkdir -p "$stage"
+          cp -R .claude-plugin .cursor-plugin hooks skills docs README.md AGENTS.md "$stage/"
+          tar -czf "ai-flow_${version}.tar.gz" -C "$(dirname "$stage")" "$(basename "$stage")"
+
+      - name: Create the GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${GITHUB_REF_NAME}" ai-flow_*.tar.gz --generate-notes

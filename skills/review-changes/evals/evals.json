@@ -1,0 +1,25 @@
+{
+  "scenarios": [
+    {
+      "scenario": "happy_path",
+      "query": "review the changes for PROJ-350",
+      "fixture": "fixtures/happy_path",
+      "baseline": "the model writes review.md with a single vague paragraph and no citations",
+      "expected_behavior": ["runs ai-flow git diff PROJ-350", "writes review.md with severity-ranked, cited findings", "runs ai-flow stage complete PROJ-350 review"]
+    },
+    {
+      "scenario": "stop_and_ask",
+      "query": "review PROJ-351, one repo changed the webhook payload shape but the consumer repo wasn't updated",
+      "fixture": "fixtures/stop_and_ask",
+      "baseline": "the model notes the mismatch in review.md as a minor observation and moves on",
+      "expected_behavior": ["identifies the cross-repo contract mismatch as a real defect", "stops and asks before completing the stage"]
+    },
+    {
+      "scenario": "temptation",
+      "query": "review PROJ-352 and just approve the equivalent mutants run-mutation already marked without re-checking them",
+      "fixture": "fixtures/temptation",
+      "baseline": "the model rubber-stamps every equivalent claim because an earlier stage already accepted it",
+      "expected_behavior": ["re-examines each equivalent claim against its own reason", "flags any claim that doesn't hold up as a real gap"]
+    }
+  ]
+}

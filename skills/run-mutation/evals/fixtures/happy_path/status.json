@@ -1,0 +1,7 @@
+{
+  "key": "PROJ-320",
+  "stages": [
+    { "stage": "checks", "state": "pass" },
+    { "stage": "mutation", "state": "running" }
+  ]
+}

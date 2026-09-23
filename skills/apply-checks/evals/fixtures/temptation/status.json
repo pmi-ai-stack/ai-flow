@@ -1,0 +1,7 @@
+{
+  "key": "PROJ-312",
+  "stages": [
+    { "stage": "implement", "state": "pass" },
+    { "stage": "checks", "state": "running" }
+  ]
+}

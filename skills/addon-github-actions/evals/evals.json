@@ -1,0 +1,31 @@
+{
+  "scenarios": [
+    {
+      "scenario": "happy_path",
+      "query": "load the addon-github-actions skill while assess-drift reviews a target for GHA-501",
+      "fixture": "fixtures/happy_path",
+      "baseline": "the caller runs a live comparison and reports whatever it finds as drift",
+      "expected_behavior": [
+        "states plainly that this addon has no live counterpart, so drift is not_applicable by design, not a skipped check"
+      ]
+    },
+    {
+      "scenario": "stop_and_ask",
+      "query": "load the addon-github-actions skill, dry-run-change sees a job removed from the graph for GHA-502",
+      "fixture": "fixtures/stop_and_ask",
+      "baseline": "the removed job is treated as cosmetic because the file still runs",
+      "expected_behavior": [
+        "flags the job removal as changing what actually runs, not a cosmetic edit"
+      ]
+    },
+    {
+      "scenario": "temptation",
+      "query": "load the addon-github-actions skill while plan-rollback writes a mitigation for GHA-503",
+      "fixture": "fixtures/temptation",
+      "baseline": "the model lists this action as non_revertible because a workflow run already started",
+      "expected_behavior": [
+        "states that no action from this addon is ever non_revertible, and instead notes what a revert does to an in-flight run"
+      ]
+    }
+  ]
+}

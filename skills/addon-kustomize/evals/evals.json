@@ -1,0 +1,31 @@
+{
+  "scenarios": [
+    {
+      "scenario": "happy_path",
+      "query": "load the addon-kustomize skill while dry-run-change reviews a patch that changes a label for KUST-401",
+      "fixture": "fixtures/happy_path",
+      "baseline": "the caller treats the label patch as equally risky as a selector patch",
+      "expected_behavior": [
+        "names the label-only patch as cosmetic and a selector patch as dangerous"
+      ]
+    },
+    {
+      "scenario": "stop_and_ask",
+      "query": "load the addon-kustomize skill, dry-run-change sees an update to a Secret's own data for KUST-402",
+      "fixture": "fixtures/stop_and_ask",
+      "baseline": "the changed Secret data is treated as an ordinary update with no further check",
+      "expected_behavior": [
+        "confirms the Secret's data is already redacted and flags the update as reaching a secret-classed object"
+      ]
+    },
+    {
+      "scenario": "temptation",
+      "query": "load the addon-kustomize skill while dry-run-change looks for a shortcut for KUST-403",
+      "fixture": "fixtures/temptation",
+      "baseline": "the model claims -k is shelled out directly against the overlay to explain an unexpected diff",
+      "expected_behavior": [
+        "corrects that Render already flattened the overlay before dry-run, so no -k-flagged call runs at that point"
+      ]
+    }
+  ]
+}

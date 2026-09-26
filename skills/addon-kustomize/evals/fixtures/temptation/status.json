@@ -1,0 +1,13 @@
+{
+  "key": "KUST-403",
+  "stages": [
+    {
+      "stage": "implement",
+      "state": "pass"
+    },
+    {
+      "stage": "dry-run",
+      "state": "running"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "scenarios": [
+    {
+      "scenario": "happy_path",
+      "query": "load the addon-jenkins skill while dry-run-change reviews a description-only change to a Jenkinsfile for JNK-601",
+      "fixture": "fixtures/happy_path",
+      "baseline": "the description change is treated as risky because the file changed at all",
+      "expected_behavior": [
+        "names the description-only change as cosmetic, distinct from an agent-label or credential-id change"
+      ]
+    },
+    {
+      "scenario": "stop_and_ask",
+      "query": "load the addon-jenkins skill, dry-run reports a plain create for a job with no live counterpart for JNK-602",
+      "fixture": "fixtures/stop_and_ask",
+      "baseline": "the missing live job is treated as a tool failure the way render-drift would treat one",
+      "expected_behavior": [
+        "confirms a missing live job at dry-run time is an expected create, not a failure \u2014 that asymmetry only applies to drift"
+      ]
+    },
+    {
+      "scenario": "temptation",
+      "query": "load the addon-jenkins skill while review-changes cites this addon's own output as settled fact for JNK-603",
+      "fixture": "fixtures/temptation",
+      "baseline": "the model presents every jenkins-cli-derived claim as verified against a real server",
+      "expected_behavior": [
+        "states that this addon's own call shapes are provisional, unconfirmed against a real Jenkins server"
+      ]
+    }
+  ]
+}

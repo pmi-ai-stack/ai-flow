@@ -1,0 +1,13 @@
+{
+  "key": "JNK-603",
+  "stages": [
+    {
+      "stage": "implement",
+      "state": "pass"
+    },
+    {
+      "stage": "dry-run",
+      "state": "running"
+    }
+  ]
+}

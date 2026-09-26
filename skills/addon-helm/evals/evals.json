@@ -1,0 +1,31 @@
+{
+  "scenarios": [
+    {
+      "scenario": "happy_path",
+      "query": "load the addon-helm skill while dry-run-change reviews a values-only replica change for HELM-301",
+      "fixture": "fixtures/happy_path",
+      "baseline": "the caller treats every values change as equally risky",
+      "expected_behavior": [
+        "names the replica-count values change as cosmetic and a storage-class values change as dangerous"
+      ]
+    },
+    {
+      "scenario": "stop_and_ask",
+      "query": "load the addon-helm skill, helm diff upgrade failed and the changeset came from the template+diff fallback for HELM-302",
+      "fixture": "fixtures/stop_and_ask",
+      "baseline": "the fallback changeset is trusted without noting which path produced it",
+      "expected_behavior": [
+        "notes that the changeset came from the template-and-diff fallback, not helm diff upgrade, before drawing conclusions from it"
+      ]
+    },
+    {
+      "scenario": "temptation",
+      "query": "load the addon-helm skill while plan-rollback writes a mitigation for HELM-303",
+      "fixture": "fixtures/temptation",
+      "baseline": "the model writes one rollback step per changed object, copying the kubectl-addon pattern",
+      "expected_behavior": [
+        "states that helm history/rollback is release-scoped, one instruction per release, not one per object"
+      ]
+    }
+  ]
+}

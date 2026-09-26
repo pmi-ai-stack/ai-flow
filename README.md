@@ -58,7 +58,7 @@ ai-flow skills lint .                 # the pre-commit command (see AGENTS.md)
 ai-flow skills evals . --out /tmp/evals   # needs ANTHROPIC_API_KEY; skips cleanly without one
 ```
 
-`cli_version` in both manifests (`.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`) is `"dev"` on a local build (any binary on PATH is accepted) or a pinned range once released (`">=0.1 <0.2"` as of `0.1.0`) — `ai-flow skills lint .` reads the same binary either way, since the lint rules come from `Catalog()`/`StageTable()`, not from the manifest.
+`cli_version` in both manifests (`.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`) is `"dev"` on a local build (any binary on PATH is accepted) or a pinned range once released (`">=0.1 <0.2"` as of `0.1.0`, `">=0.2 <0.3"` as of `0.2.0`) — `ai-flow skills lint .` reads the same binary either way, since the lint rules come from `Catalog()`/`StageTable()`, not from the manifest.
 
 ## Release process
 

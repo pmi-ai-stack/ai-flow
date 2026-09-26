@@ -1,0 +1,13 @@
+{
+  "key": "TF-103",
+  "stages": [
+    {
+      "stage": "implement",
+      "state": "pass"
+    },
+    {
+      "stage": "dry-run",
+      "state": "running"
+    }
+  ]
+}

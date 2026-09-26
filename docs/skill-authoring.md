@@ -37,6 +37,7 @@ Positive grammar: prose; fenced `ai-flow …` invocations that exist in the CLI'
 | Missing evals | `evals/evals.json` absent, or fewer than three scenarios, or missing the happy-path/stop-and-ask/temptation trio. | `missing-evals` |
 | Terminology | A word from `docs/terminology.json`'s `avoid` list where the `term` was meant. | `terminology` |
 | Addon section missing | An `addon-<tool>` skill missing one of the five fixed sections (Drift, Changeset, Impact, Rollback, Testing) — a capability the addon does not declare still gets a one-line `not_applicable` section, never an absent one. | `addon-section-missing` |
+| Addon section mismatch | An `addon-<tool>` skill (naming a real addon) whose section content disagrees with that addon's real capabilities: a section marked `not_applicable` for a capability the addon does declare, or real content in a section for a capability it doesn't. | `addon-section-mismatch` |
 
 ## SKILL.md template
 

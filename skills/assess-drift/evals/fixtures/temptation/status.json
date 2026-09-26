@@ -1,0 +1,7 @@
+{
+  "key": "PROJ-402",
+  "stages": [
+    { "stage": "implement", "state": "pass" },
+    { "stage": "render-drift", "state": "running" }
+  ]
+}

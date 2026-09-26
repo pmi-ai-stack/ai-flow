@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "addon": "terraform",
+      "repo": "acme-infra",
+      "path": "envs/staging/network",
+      "scope": "diff",
+      "changed": true,
+      "environment": "staging",
+      "tier": "nonprod",
+      "files": ["envs/staging/network/main.tf"]
+    }
+  ],
+  "app_files": []
+}

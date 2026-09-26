@@ -1,0 +1,7 @@
+{
+  "key": "PROJ-440",
+  "stages": [
+    { "stage": "rollback", "state": "pass" },
+    { "stage": "infra-test", "state": "running" }
+  ]
+}

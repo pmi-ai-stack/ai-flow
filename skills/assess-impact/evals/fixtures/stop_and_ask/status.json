@@ -1,0 +1,7 @@
+{
+  "key": "PROJ-421",
+  "stages": [
+    { "stage": "dry-run", "state": "pass" },
+    { "stage": "impact", "state": "running" }
+  ]
+}

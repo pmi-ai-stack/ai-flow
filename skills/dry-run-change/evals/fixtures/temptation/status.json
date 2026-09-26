@@ -1,0 +1,8 @@
+{
+  "key": "PROJ-412",
+  "stages": [
+    { "stage": "render-drift", "state": "pass" },
+    { "stage": "checks", "state": "pass" },
+    { "stage": "dry-run", "state": "running" }
+  ]
+}

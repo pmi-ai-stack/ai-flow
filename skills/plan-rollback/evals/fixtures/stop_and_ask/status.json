@@ -1,0 +1,7 @@
+{
+  "key": "PROJ-431",
+  "stages": [
+    { "stage": "impact", "state": "approved" },
+    { "stage": "rollback", "state": "running" }
+  ]
+}

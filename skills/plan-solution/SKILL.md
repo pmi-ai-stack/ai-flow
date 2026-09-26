@@ -16,14 +16,16 @@ Run each instruction below and parse stdout as JSON. Exit 4: relay `needs_input.
 1. `ai-flow stage start KEY plan` — enters the stage and resolves `guidance.md` for it.
 2. `ticket.json`'s summary and description (where acceptance criteria live), its recent comments, and `images.md`/`attachments/` for anything attached.
 3. `repo.json` — the repositories in scope and each one's instructions file.
-4. `guidance.md` — `must` sections are requirements for `plan.md` itself (an architecture rule, a required ADR); `should` is the default unless `plan.md` says why not.
-5. `references/plan-format.md` for the required headings; `references/brainstorm.md` for generating real options.
+4. `ops-targets.json` — written by `stage start`'s own `ops detect` call; when it is non-empty, the ticket touches infrastructure or CI/CD.
+5. `guidance.md` — `must` sections are requirements for `plan.md` itself (an architecture rule, a required ADR); `should` is the default unless `plan.md` says why not.
+6. `references/plan-format.md` for the required headings; `references/brainstorm.md` for generating real options.
 
 ## Workflow
 
 - [ ] Read the ticket and every attachment; if the request is ambiguous or the acceptance criteria conflict, ask the developer before drafting anything
 - [ ] Draft at least two genuinely different options (see `references/brainstorm.md`), not one option and a strawman
 - [ ] Choose one and record why, in `plan.md` itself
+- [ ] For a non-empty `ops-targets.json`, add the two OPS headings from `references/plan-format.md` and name each target's environment and expected actions
 - [ ] Write `plan.md` with the required headings from `references/plan-format.md`
 - [ ] Run `ai-flow stage complete KEY plan`
 

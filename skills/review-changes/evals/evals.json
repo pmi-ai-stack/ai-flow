@@ -5,7 +5,7 @@
       "query": "review the changes for PROJ-350",
       "fixture": "fixtures/happy_path",
       "baseline": "the model writes review.md with a single vague paragraph and no citations",
-      "expected_behavior": ["runs ai-flow git diff PROJ-350", "writes review.md with severity-ranked, cited findings", "runs ai-flow stage complete PROJ-350 review"]
+      "expected_behavior": ["runs ai-flow git diff PROJ-350", "loads the addon-terraform skill for the target in ops-targets.json", "writes review.md with severity-ranked, cited findings", "runs ai-flow stage complete PROJ-350 review"]
     },
     {
       "scenario": "stop_and_ask",

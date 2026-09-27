@@ -1,0 +1,44 @@
+name: Nightly evals
+
+# Phase 30 activates the CI gates table's own nightly cell: "every
+# skill, one model each nightly (both hosts once Cursor headless runs,
+# from P8)". Cursor headless stays off here — internal/skills/evals's
+# own cursorRunner still returns ErrHostUnverified in ai-flow-cli as of
+# this phase (`agent -p`'s headless prompt/working-directory/model
+# flags remain unverified in every development environment this
+# workspace's phases have run in; see `.ai/phase-30/plan.md`'s own
+# Cursor section for the evidence looked for and not found) — so this
+# job runs the one cell that is real today, Claude Code only, and gains
+# a Cursor row the moment that sentinel error is retired, with no other
+# change needed here.
+
+on:
+  schedule:
+    - cron: "43 4 * * *" # 04:43 UTC — off the hour, distinct from ai-flow-cli's own nightly slot
+  workflow_dispatch: {}
+
+jobs:
+  nightly-evals-claude-code:
+    name: Every skill × Claude Code × Sonnet 5
+    runs-on: ubuntu-latest
+    # Every skill, not just PR-changed ones (unlike the required
+    # plugin-evals job) — the CI gates table's own nightly line is
+    # explicitly broader than the PR one for this reason.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned ai-flow-cli release
+        uses: ./.github/actions/install-pinned-cli
+
+      - name: ai-flow skills evals .
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ai-flow skills evals . --host claude-code --model claude-sonnet-5 --out "$RUNNER_TEMP/evals"
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-eval-results-claude-code-sonnet-5
+          path: ${{ runner.temp }}/evals/results.json
+          if-no-files-found: ignore

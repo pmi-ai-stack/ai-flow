@@ -1,0 +1,50 @@
+name: Weekly eval matrix
+
+# Phase 30 activates the CI gates table's own weekly cell: "the full
+# matrix Haiku 4.5 / Sonnet 5 / Opus 5 and, from P8, Cursor default
+# weekly; pass rate ≥ 90 % per host, every temptation scenario passing
+# on every model." Cursor is not in the matrix below for the identical,
+# still-open reason nightly.yml's own header names (`agent -p`'s
+# headless flags remain unverified) — add a `host: cursor` matrix leg
+# the day that sentinel error is retired, with no other change needed.
+#
+# internal/skills/evals.Summary.Failing (ai-flow-cli) already is the
+# ">= 90% and every temptation scenario" gate — `skills evals` exits 6
+# (invalid_result) the moment either condition fails on any one model,
+# so this workflow needs no separate threshold-checking step of its
+# own: a red matrix cell already means "this model failed the bar."
+
+on:
+  schedule:
+    - cron: "0 5 * * 1" # 05:00 UTC every Monday
+  workflow_dispatch: {}
+
+jobs:
+  weekly-eval-matrix:
+    name: Every skill × Claude Code × ${{ matrix.model }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        model:
+          - claude-haiku-4-5-20251001
+          - claude-sonnet-5
+          - claude-opus-5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned ai-flow-cli release
+        uses: ./.github/actions/install-pinned-cli
+
+      - name: ai-flow skills evals .
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ai-flow skills evals . --host claude-code --model ${{ matrix.model }} --out "$RUNNER_TEMP/evals"
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-eval-results-claude-code-${{ matrix.model }}
+          path: ${{ runner.temp }}/evals/results.json
+          if-no-files-found: ignore

@@ -23,7 +23,6 @@ fi
 # shellcheck source=./cli-version.sh
 . "$PLUGIN_ROOT/hooks/cli-version.sh"
 
-install_url="https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/main/install.sh"
 cli_version_wanted="$(read_cli_version "$MANIFEST")"
 
 install_needed=0
@@ -37,17 +36,29 @@ elif [ "$cli_version_wanted" != "dev" ]; then
 fi
 
 if [ "$install_needed" -eq 1 ]; then
+	install_rc=0
 	if [ "$cli_version_wanted" = "dev" ]; then
 		echo "session-start.sh: ai-flow not found on PATH, installing latest" >&2
-		curl -fsSL "$install_url" | sh
+		run_install_sh || install_rc=$?
 	else
 		pinned_tag="$(resolve_pinned_tag "$cli_version_wanted")"
 		if [ -n "$pinned_tag" ]; then
 			echo "session-start.sh: installing ai-flow ${pinned_tag} (cli_version ${cli_version_wanted})" >&2
-			curl -fsSL "$install_url" | sh -s -- -v "$pinned_tag"
+			run_install_sh -v "$pinned_tag" || install_rc=$?
 		else
 			echo "session-start.sh: could not resolve a released ai-flow-cli version matching cli_version '${cli_version_wanted}'; installing latest instead" >&2
-			curl -fsSL "$install_url" | sh
+			run_install_sh || install_rc=$?
+		fi
+	fi
+	if [ "$install_rc" -ne 0 ]; then
+		# An out-of-range binary still on PATH beats none: keep the
+		# session usable and say why. With nothing on PATH there is no
+		# CLI to exec, so fail here, at the cause.
+		if command -v ai-flow >/dev/null 2>&1; then
+			echo "session-start.sh: installing ai-flow failed; continuing with $(command -v ai-flow), which does not satisfy cli_version '${cli_version_wanted}'" >&2
+		else
+			echo "session-start.sh: installing ai-flow failed and no ai-flow is on PATH; see the install.sh output above" >&2
+			exit 1
 		fi
 	fi
 fi

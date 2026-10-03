@@ -6,6 +6,34 @@
 # reads a hook payload. Functions only: source this file, don't run it.
 set -eu
 
+# INSTALL_SH_SHA pins ai-flow-cli's install.sh to one commit, so the
+# script a session or CI job pipes into sh is a reviewed, immutable
+# blob — never whatever a branch points at today. The one constant both
+# plugin call sites (session-start.sh, install-pinned-cli/action.yml)
+# read. Bump it in the same PR as any ai-flow-cli install.sh change, or
+# bootstrap silently keeps running the older script.
+INSTALL_SH_SHA="4b760f37cd6207cfb48b250a962c2b585adb4605"
+# shellcheck disable=SC2034 # read by the scripts that source this file
+INSTALL_SH_URL="https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/${INSTALL_SH_SHA}/install.sh"
+
+# run_install_sh [ARGS...]: downloads INSTALL_SH_URL to a temporary file
+# and runs it with ARGS, returning non-zero when either step fails.
+# Never `curl | sh`: without pipefail a failed download pipes nothing
+# into sh, which exits 0 — the bootstrap then "succeeds" and dies later,
+# far from the cause, at the first ai-flow invocation.
+run_install_sh() {
+	install_sh="$(mktemp)"
+	if ! curl -fsSL -o "$install_sh" "$INSTALL_SH_URL"; then
+		echo "cli-version.sh: could not download ${INSTALL_SH_URL}" >&2
+		rm -f "$install_sh"
+		return 1
+	fi
+	rc=0
+	sh "$install_sh" "$@" || rc=$?
+	rm -f "$install_sh"
+	return "$rc"
+}
+
 # read_cli_version MANIFEST: prints the manifest's metadata.cli_version
 # field — the one place this extraction lives, so a plugin install and
 # a CI job read the same value the same way.
@@ -45,9 +73,19 @@ version_cmp() {
 # blocking a session or a CI run — the same fail-open principle the
 # CLI's guard table already applies to an unrecognized hook payload
 # shape.
+#
+# A VERSION that is not a dotted number ("dev", "(devel)" — what a local
+# `go build` reports) satisfies every range: the manifest-side rule
+# ("dev" accepts any binary on PATH) applied to the binary side. A
+# developer's own build is the thing they are testing; replacing it
+# with a release on every session start is the bug, not the safety net.
 range_satisfied() {
 	version="$1"
 	range="$2"
+	case "$(version_num "$version")" in
+	[0-9]*) ;;
+	*) return 0 ;;
+	esac
 	# shellcheck disable=SC2086 # word-splitting the range into its clauses is intentional
 	for clause in $range; do
 		case "$clause" in

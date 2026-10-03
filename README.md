@@ -58,11 +58,13 @@ ai-flow skills lint .                 # the pre-commit command (see AGENTS.md)
 ai-flow skills evals . --out /tmp/evals   # needs ANTHROPIC_API_KEY; skips cleanly without one
 ```
 
-`cli_version` in both manifests (`.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`) is `"dev"` on a local build (any binary on PATH is accepted) or a pinned range once released (`">=0.1 <0.2"` as of `0.1.0`, `">=0.2 <0.3"` as of `0.2.0`) — `ai-flow skills lint .` reads the same binary either way, since the lint rules come from `Catalog()`/`StageTable()`, not from the manifest.
+`cli_version` in both manifests (`.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`) is `"dev"` on a local build (any binary on PATH is accepted) or a pinned range once released (`">=0.1 <0.2"` as of `0.1.0`, `">=0.2 <0.3"` as of `0.2.0`) — `ai-flow skills lint .` reads the same binary either way, since the lint rules come from `Catalog()`/`StageTable()`, not from the manifest. A binary that reports itself as `dev` (any local `go build`) satisfies every range too, so `session-start.sh` never replaces a developer's own build with a release.
 
 ## Release process
 
 A release is a tag `vX.Y.Z` pushed after a commit that bumps `version` in **both** manifests to `X.Y.Z` — the release workflow (`.github/workflows/release.yml`) verifies the tag matches before packaging, rather than writing the bump itself, so a git checkout pinned to the tag is always correct on its own.
+
+`hooks/cli-version.sh`'s `INSTALL_SH_SHA` pins the `ai-flow-cli` `install.sh` that `session-start.sh` and CI download to one commit. Bump it in the same change as any `install.sh` change in `ai-flow-cli`, or bootstrap keeps running the older script.
 
 ## What's here
 

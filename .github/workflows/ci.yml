@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
 
 jobs:
@@ -18,6 +18,24 @@ jobs:
           scandir: "./hooks"
           severity: warning
 
+      # The bootstrap comparison session-start.sh runs on every session:
+      # a regression here either reinstalls on every turn (dev build) or
+      # never installs (released build), both silently.
+      - name: cli-version.sh range and pin checks
+        run: |
+          set -eu
+          . ./hooks/cli-version.sh
+          expect() { if range_satisfied "$2" "$3"; then got=in; else got=out; fi
+            [ "$got" = "$1" ] || { echo "::error::range_satisfied '$2' '$3' = $got, want $1"; exit 1; }; }
+          expect in  dev      ">=0.2 <0.3"
+          expect in  "(devel)" ">=0.2 <0.3"
+          expect in  0.2.0    ">=0.2 <0.3"
+          expect in  v0.2.4   ">=0.2 <0.3"
+          expect out 0.1.9    ">=0.2 <0.3"
+          expect out 0.3.0    ">=0.2 <0.3"
+          echo "$INSTALL_SH_SHA" | grep -Eq '^[0-9a-f]{40}$' \
+            || { echo "::error file=hooks/cli-version.sh::INSTALL_SH_SHA must be a full 40-hex commit SHA, never a branch"; exit 1; }
+
       - name: JSON validity — manifests and hooks
         run: |
           set -eu
@@ -32,8 +50,8 @@ jobs:
             python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
           done
 
-      # ai-flow skills lint .: cli_version is a real pinned range as of
-      # phase 17 (">=0.1 <0.2"), so the spec's own words apply — install
+      # ai-flow skills lint .: cli_version is a real pinned range (as of
+      # phase 29, ">=0.2 <0.3"), so the spec's own words apply — install
       # the release that range names, the same way session-start.sh does
       # for a real plugin install, rather than building from source.
       - name: Install the pinned ai-flow-cli release
@@ -41,6 +59,14 @@ jobs:
 
       - name: ai-flow skills lint .
         run: ai-flow skills lint .
+
+      # CI gates table, Plugin required row: the recorded host payloads
+      # round-trip through parse, guard and encode for both hosts.
+      - name: ai-flow hook selftest --host claude-code
+        run: ai-flow hook selftest --host claude-code
+
+      - name: ai-flow hook selftest --host cursor
+        run: ai-flow hook selftest --host cursor
 
   # Plugin evals runs skills evals . — a separate job from
   # plugin-required, deliberately: a missing ANTHROPIC_API_KEY

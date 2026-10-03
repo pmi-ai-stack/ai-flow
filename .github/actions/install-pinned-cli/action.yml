@@ -8,6 +8,13 @@ description: >-
 runs:
   using: composite
   steps:
+    # install.sh -s below makes the checksums.txt signature check
+    # mandatory, so cosign must be on PATH: a CI job must never fall back
+    # to checksum-only verification.
+    - uses: sigstore/cosign-installer@v3
+      with:
+        cosign-release: v2.4.1
+
     - name: Install the pinned ai-flow-cli release
       shell: bash
       run: |
@@ -20,5 +27,5 @@ runs:
           exit 1
         fi
         echo "installing ai-flow-cli ${pinned_tag} (cli_version ${cli_version})"
-        curl -fsSL https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/main/install.sh | sh -s -- -v "$pinned_tag" -d "$RUNNER_TEMP/bin"
+        run_install_sh -v "$pinned_tag" -d "$RUNNER_TEMP/bin" -s
         echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"

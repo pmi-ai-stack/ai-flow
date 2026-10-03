@@ -5,18 +5,37 @@ on:
     branches: [master]
   pull_request:
 
+# Least privilege: every job here only reads the repository. A job that
+# ever needs more gets its own job-level grant, never a wider default.
+permissions:
+  contents: read
+
 jobs:
   plugin-required:
     name: Plugin required
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: shellcheck hooks
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
         with:
           scandir: "./hooks"
           severity: warning
+
+      # Phase 33 (SEC-11): every third-party action is pinned to a commit
+      # SHA (dependabot moves the pins) and every workflow declares its
+      # own least-privilege permissions. The CLI repository enforces the
+      # same rule with TestWorkflowsPinActionsBySHA.
+      - name: actions pinned by SHA, permissions declared
+        run: |
+          set -eu
+          bad="$(grep -rhoE '^\s*(- )?uses:\s*\S+' .github | sed -E 's/.*uses:\s*//' \
+            | grep -vE '^\./' | grep -vE '@[0-9a-f]{40}$' || true)"
+          if [ -n "$bad" ]; then echo "::error::not pinned to a commit SHA:"; echo "$bad"; exit 1; fi
+          for f in .github/workflows/*.yml; do
+            grep -q '^permissions:' "$f" || { echo "::error::$f has no top-level permissions: block"; exit 1; }
+          done
 
       # The bootstrap comparison session-start.sh runs on every session:
       # a regression here either reinstalls on every turn (dev build) or
@@ -85,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install the pinned ai-flow-cli release
         uses: ./.github/actions/install-pinned-cli
@@ -97,7 +116,7 @@ jobs:
 
       - name: Upload eval results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: eval-results
           path: ${{ runner.temp }}/evals/results.json

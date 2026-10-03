@@ -19,6 +19,11 @@ on:
     - cron: "0 5 * * 1" # 05:00 UTC every Monday
   workflow_dispatch: {}
 
+# Least privilege: every job here only reads the repository. A job that
+# ever needs more gets its own job-level grant, never a wider default.
+permissions:
+  contents: read
+
 jobs:
   weekly-eval-matrix:
     name: Every skill × Claude Code × ${{ matrix.model }}
@@ -31,7 +36,7 @@ jobs:
           - claude-sonnet-5
           - claude-opus-5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install the pinned ai-flow-cli release
         uses: ./.github/actions/install-pinned-cli
@@ -43,7 +48,7 @@ jobs:
 
       - name: Upload eval results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: weekly-eval-results-claude-code-${{ matrix.model }}
           path: ${{ runner.temp }}/evals/results.json

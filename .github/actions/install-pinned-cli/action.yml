@@ -11,7 +11,7 @@ runs:
     # install.sh -s below makes the checksums.txt signature check
     # mandatory, so cosign must be on PATH: a CI job must never fall back
     # to checksum-only verification.
-    - uses: sigstore/cosign-installer@v3
+    - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
       with:
         cosign-release: v2.4.1
 

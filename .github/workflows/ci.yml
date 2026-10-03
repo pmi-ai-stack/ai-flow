@@ -23,6 +23,12 @@ jobs:
           scandir: "./hooks"
           severity: warning
 
+      - name: shellcheck CI scripts
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
+        with:
+          scandir: "./.github/scripts"
+          severity: warning
+
       # Phase 33 (SEC-11): every third-party action is pinned to a commit
       # SHA (dependabot moves the pins) and every workflow declares its
       # own least-privilege permissions. The CLI repository enforces the
@@ -102,7 +108,10 @@ jobs:
   plugin-evals:
     name: Plugin evals
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false
+    # Dependabot PRs are same-repository but run without repository
+    # secrets, so they are excluded like forks — otherwise
+    # --require-credentials below would fail every one of them.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -112,7 +121,19 @@ jobs:
       - name: ai-flow skills evals .
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: ai-flow skills evals . --out "$RUNNER_TEMP/evals"
+        # --require-credentials: this job only runs where the secret
+        # should exist, so a missing key is a misconfiguration to fail on,
+        # not the fork-PR skip the CLI otherwise reports as ok.
+        run: |
+          set -o pipefail
+          ai-flow skills evals . --require-credentials --out "$RUNNER_TEMP/evals" | tee "$RUNNER_TEMP/evals-envelope.json"
+
+      # Wave 4 (phase 35): one unmistakable verdict per run — SKIPPED,
+      # PASSED or FAILED — in the run's summary page, never a green tick
+      # for a run in which nothing ran.
+      - name: Eval summary
+        if: always()
+        run: .github/scripts/evals-summary.sh "$RUNNER_TEMP/evals-envelope.json" "$RUNNER_TEMP/evals/results.json" "Plugin evals — Claude Code × Sonnet 5"
 
       - name: Upload eval results
         if: always()

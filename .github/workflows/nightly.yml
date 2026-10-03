@@ -38,7 +38,18 @@ jobs:
       - name: ai-flow skills evals .
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: ai-flow skills evals . --host claude-code --model claude-sonnet-5 --out "$RUNNER_TEMP/evals"
+        # Scheduled: the secret must exist, so a missing key fails the run
+        # instead of skipping it green (phase 35).
+        run: |
+          set -o pipefail
+          ai-flow skills evals . --host claude-code --model claude-sonnet-5 --require-credentials --out "$RUNNER_TEMP/evals" | tee "$RUNNER_TEMP/evals-envelope.json"
+
+      # Wave 4 (phase 35): one unmistakable verdict per run — SKIPPED,
+      # PASSED or FAILED — in the run's summary page, never a green tick
+      # for a run in which nothing ran.
+      - name: Eval summary
+        if: always()
+        run: .github/scripts/evals-summary.sh "$RUNNER_TEMP/evals-envelope.json" "$RUNNER_TEMP/evals/results.json" "Nightly evals — Claude Code × Sonnet 5"
 
       - name: Upload eval results
         if: always()

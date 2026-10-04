@@ -1,10 +1,10 @@
 {
   "name": "ai-flow",
   "description": "Deterministic ticket-to-PR pipeline for app and OPS tickets. Skills carry judgement only; the ai-flow CLI carries every side effect (tracker, git, git host, infra tools, test and mutation runners).",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "skills": "./skills/",
   "hooks": "./hooks/claude-code.json",
   "metadata": {
-    "cli_version": ">=0.2 <0.3"
+    "cli_version": ">=0.3 <0.4"
   }
 }

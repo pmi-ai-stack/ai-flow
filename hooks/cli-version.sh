@@ -18,6 +18,10 @@ INSTALL_SH_URL="https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/${INS
 
 # run_install_sh [ARGS...]: downloads INSTALL_SH_URL to a temporary file
 # and runs it with ARGS, returning non-zero when either step fails.
+# AI_FLOW_REQUIRE_SIGNATURE=1 adds install.sh's -s: the cosign signature
+# check becomes mandatory instead of being skipped (checksum only) when
+# cosign is not on PATH. Opt-in, because making it the default would
+# fail the first-run bootstrap on every machine without cosign.
 # Never `curl | sh`: without pipefail a failed download pipes nothing
 # into sh, which exits 0 — the bootstrap then "succeeds" and dies later,
 # far from the cause, at the first ai-flow invocation.
@@ -27,6 +31,9 @@ run_install_sh() {
 		echo "cli-version.sh: could not download ${INSTALL_SH_URL}" >&2
 		rm -f "$install_sh"
 		return 1
+	fi
+	if [ "${AI_FLOW_REQUIRE_SIGNATURE:-}" = "1" ]; then
+		set -- -s "$@"
 	fi
 	rc=0
 	sh "$install_sh" "$@" || rc=$?

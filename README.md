@@ -4,7 +4,7 @@ A Claude Code / Cursor plugin for a deterministic ticket-to-PR pipeline. Skills 
 
 ## Install
 
-Either host installs the pinned `ai-flow` CLI release automatically on first use (`hooks/session-start.sh`, resolved against the manifest's `cli_version` range); `ai-flow doctor` reports the plugin roots it found. Nothing below needs a manual CLI install first.
+Either host installs the pinned `ai-flow` CLI release automatically on first use (`hooks/session-start.sh`, resolved against the manifest's `cli_version` range); `ai-flow doctor` reports the plugin roots it found. Nothing below needs a manual CLI install first. The release's checksum is always verified; its cosign signature is verified when `cosign` is on PATH, and `export AI_FLOW_REQUIRE_SIGNATURE=1` makes that check mandatory (the install fails without `cosign`) instead of falling back to the checksum alone.
 
 **Claude Code — plugin**
 

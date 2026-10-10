@@ -24,7 +24,7 @@ Run each instruction below in the order given and parse stdout as JSON. Exit 4: 
 - [ ] Write `pr-body.md` with a `## Summary` and a `## Test plan` heading, drawing on `plan.md`, `test-results.json`, `mutation-results.json` and `review.md`
 - [ ] Run `ai-flow standards check KEY --stage ship`; fix at the source anything it reports; repeat until no `must` finding is open
 - [ ] Ask the developer to say "ship it"
-- [ ] Once they do, run `ai-flow stage approve KEY ship`
+- [ ] Once they do, run `ai-flow stage approve KEY ship`; the host asks them to confirm it. If the guard refuses it instead, ask the developer to run that same instruction in their own terminal, wait for them to say it is done, then check `ai-flow status KEY`
 - [ ] Run `ai-flow git commit KEY`, then `ai-flow pr create KEY`
 - [ ] Run `ai-flow ticket update KEY --status in_review --marker ship --comment "PR links, mutation score and check summary"`
 - [ ] Run `ai-flow stage complete KEY ship`

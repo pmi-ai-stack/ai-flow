@@ -11,7 +11,7 @@
         "command": "${CURSOR_PLUGIN_ROOT}/hooks/guard.sh"
       },
       {
-        "matcher": "Write",
+        "matcher": "Write|Delete",
         "command": "${CURSOR_PLUGIN_ROOT}/hooks/guard.sh"
       }
     ]

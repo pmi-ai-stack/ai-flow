@@ -20,7 +20,7 @@ Run `ai-flow status KEY` to find what happens next, and parse stdout as JSON. Wh
 ## Workflow
 
 - [ ] Run `ai-flow status KEY`
-- [ ] `next_state` is `awaiting_approval` — present the gate in full; once the developer approves it, run `ai-flow stage approve KEY plan` (or whichever stage `status` named) — never `stage start`, which would discard the gate as a revision
+- [ ] `next_state` is `awaiting_approval` — present the gate in full; once the developer approves it, run `ai-flow stage approve KEY plan` (or whichever stage `status` named), which the host asks them to confirm; if the guard refuses it, ask the developer to run it in their own terminal and wait — never `stage start`, which would discard the gate as a revision
 - [ ] `next_state` is `pending` or `running` and `next_skill` is set — load the skill it names
 - [ ] `next_state` is `pending` and `next_command` is set with no skill — run that instruction directly
 - [ ] `next_state` is `fail` — show the failure and stop

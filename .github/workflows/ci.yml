@@ -61,6 +61,11 @@ jobs:
           echo "$INSTALL_SH_SHA" | grep -Eq '^[0-9a-f]{40}$' \
             || { echo "::error file=hooks/cli-version.sh::INSTALL_SH_SHA must be a full 40-hex commit SHA, never a branch"; exit 1; }
 
+      # AI_FLOW_REQUIRE_SIGNATURE=1 must turn into install.sh's -s, and
+      # nothing else may (2026-10-04 security review #6).
+      - name: run_install_sh signature opt-in
+        run: sh .github/scripts/run-install-sh-test.sh "$PWD"
+
       - name: JSON validity — manifests and hooks
         run: |
           set -eu

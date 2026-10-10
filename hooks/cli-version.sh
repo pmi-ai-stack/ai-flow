@@ -12,7 +12,7 @@ set -eu
 # plugin call sites (session-start.sh, install-pinned-cli/action.yml)
 # read. Bump it in the same PR as any ai-flow-cli install.sh change, or
 # bootstrap silently keeps running the older script.
-INSTALL_SH_SHA="4b760f37cd6207cfb48b250a962c2b585adb4605"
+INSTALL_SH_SHA="3785e5fca8fa7c463d568da0cde3c57483526d82"
 # shellcheck disable=SC2034 # read by the scripts that source this file
 INSTALL_SH_URL="https://raw.githubusercontent.com/pmi-ai-stack/ai-flow-cli/${INSTALL_SH_SHA}/install.sh"
 

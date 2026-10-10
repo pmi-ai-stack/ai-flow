@@ -1,0 +1,35 @@
+name: CodeQL
+
+# Non-required (phase 48, HYG-5). This repository has no compiled code;
+# CodeQL's `actions` language checks the workflows and the composite
+# action under .github/actions/ (untrusted input in run: steps,
+# over-broad permissions). Shell scripts are covered by shellcheck in ci.yml.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    - cron: "23 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: CodeQL (actions)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4
+        with:
+          languages: actions
+          build-mode: none
+
+      - uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4
+        with:
+          category: /language:actions

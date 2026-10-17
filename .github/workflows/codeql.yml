@@ -22,6 +22,9 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      # The CodeQL action reads its own workflow run; without this a
+      # private repository fails with "Resource not accessible by integration".
+      actions: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
